@@ -1,0 +1,82 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{- Seth Johnston -}
+
+{- Chinese Remiander Theorem -}
+
+-- should be looping thorugh the input tuples list given in crt 
+multTuples :: [(Integer, Integer)] -> Integer
+multTuples xs = product [ y | (x,y) <- xs ]
+
+-- should return a list of lists for crt to use so that it can find the 
+listsGen :: [(Integer, Integer)] -> Integer -> [[Integer]]
+listsGen [] _ = []
+listsGen (x:xs) z = [y | y <- [0..z], y `mod` snd x == fst x] : listsGen xs z
+
+intersection1 :: [Integer] -> [Integer] -> [Integer]
+intersection1 = intersection1
+
+intersection2 :: [[Integer]] -> [Integer]
+intersection2 [] = []
+intersection2 (x:xs)
+                | xs /= [] = intersection1 x (intersection2 xs)
+                | otherwise = x
+
+
+crt :: [(Integer, Integer)] -> (Integer, Integer)  -- List of integer tuples!! (ai, ni) ai - remainder; ni = numbers
+-- there is no empty declaration for tuples meaning that tuples do not provide the possibility of emptiness
+-- can assume non-negative (a and n) and coprime (a) inputs 
+crt xs = (head (intersection2 (listsGen xs (multTuples xs))), multTuples xs)
+
+
+
+{- k-composite Numbers -}
+
+factList :: Int -> [Int]
+factList val = temp 1
+  where
+    temp tester
+      | tester == val = [val]
+      | val `mod` tester == 0 = tester : rem
+      | otherwise = rem
+      where rem = temp (tester + 1)
+
+kcomposite :: Int -> [Int]
+kcomposite num = [x | x <- [1..], num+2 == length (factList x)]
+
+
+{- Simple Anagram Code -}
+
+diff :: [Int] -> [Char] -> Int
+diff [] _ = 0
+diff (x:xs) sentence
+    | x > length sentence = x - length sentence
+    | otherwise = diff xs sentence
+
+buffX :: Int -> [Char] -> [Char]
+buffX len sentence = sentence ++ replicate len 'X'
+
+sentenceYN :: [Int] -> [Char] -> Bool
+sentenceYN [] _ = False 
+sentenceYN (x:xs) sentence 
+    | length sentence == x = True 
+    | x > length sentence = False 
+    | otherwise = sentenceYN xs sentence
+
+twoComp :: [Char] -> [Char]
+twoComp sentence 
+    | sentenceYN (kcomposite 2) sentence = sentence
+    | otherwise = buffX (diff (kcomposite 2) sentence) sentence
+    
+
+-- anagramEncode :: [Char] -> [Char]
+
+-- anagramDecode :: [Char] -> [Char]
+
+-- {- Die Hard 3: Jugs Problem -}
+
+measureWater :: Int -> Int -> Int ->  Bool
+measureWater x y z
+    | x + y < z = False
+    | x == z || y == z || x + y == z = True
+    | z `mod` gcd x y == 0 = True
+    | otherwise = False
